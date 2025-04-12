@@ -1,29 +1,51 @@
-import React from 'react'
-import '../App.css'
-const Navbar = ({token,setToken}) => {
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import '../App.css';
 
-  const LogOutHandler = () =>{
+const Navbar = ({ setToken, token }) => {
+  const [cartCount, setCartCount] = useState(0);
+  const navigate = useNavigate();
+
+  // Update cart count dynamically on cart changes
+  useEffect(() => {
+    const updateCartCount = () => {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      setCartCount(cart.length);
+    };
+
+    updateCartCount();
+
+    window.addEventListener('storage', updateCartCount); // in case multiple tabs modify cart
+    return () => window.removeEventListener('storage', updateCartCount);
+  }, []);
+
+  const LogOutHandler = () => {
     setToken("");
     localStorage.clear();
-  }
+    navigate('/login');
+  };
+
   return (
-    <div className='navbar'>
+    <nav className="navbar-container">
+      <Link to="/" className="logo">
+        Shopsy
         
-        <h1>Shopsy</h1>
+      </Link>
+      
 
-{token && (
+      {token && (
+        <div className="nav-links">
+          <Link to="/" className="nav-item">Home</Link>
+          <Link to="/cart" className="nav-item">
+            Cart <span className="cart-badge">{cartCount}</span>
+          </Link>
+          <button className="logout-btn" onClick={LogOutHandler}>
+            Logout
+          </button>
+        </div>
+      )}
+    </nav>
+  );
+};
 
-<button className='log-out-btn' onClick={() => LogOutHandler()}> Log Out</button>
-  
-)}
-  
-
-
-  
-
-
-    </div>
-  )
-}
-
-export default Navbar
+export default Navbar;
